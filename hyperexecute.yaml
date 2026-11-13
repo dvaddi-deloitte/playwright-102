@@ -1,0 +1,45 @@
+---
+version: 0.1
+globalTimeout: 90
+testSuiteTimeout: 90
+testSuiteStep: 90
+ 
+runson: ${matrix.os}
+matrix:
+  os: [win, linux]
+ 
+autosplit: true
+parallelism: 1
+retryOnFailure: true
+maxRetries: 1
+ 
+env:
+  BASE_URL: "https://www.testmuai.com/selenium-playground/"
+  WELCOME_MESSAGE: "Welcome to TestMu AI"
+  FORM_PASSWORD: ${{ .secrets.FORM_PASSWORD }}
+ 
+cacheKey: '{{ checksum "package-lock.json" }}'
+cacheDirectories:
+  - node_modules
+ 
+pre:
+  - npm install
+  - npx playwright install chromium
+ 
+testDiscovery:
+  type: raw
+  mode: dynamic
+  command: echo tests/assignment.spec.js
+ 
+testRunnerCommand: npx playwright test $test
+ 
+post:
+  - echo "Execution finished"
+ 
+mergeArtifacts: true
+uploadArtifacts:
+  - name: Playwright-Test-Artifacts
+    path:
+      - playwright-report/**
+      - test-results/**
+ 
